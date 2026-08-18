@@ -66,22 +66,22 @@ Le réseau est composé de 3 sites (Router0, Router1, Router2/ISP) interconnect�
 ## ✅ Tests & validations
 
 **Topologie complète du réseau**
-![Topologie réseau](./img/network-topology.png)
+![Topologie réseau](network-topology.png)
 
 **Formation des adjacences OSPF au démarrage** — `%OSPF-5-ADJCHG` FULL sur toutes les liaisons Serial
-![Adjacences OSPF](./img/ospf-adjacency-boot.png)
+![Adjacences OSPF](ospf-adjacency-boot.png)
 
 **Vérification des processus OSPF** (`show ip protocols`) — Process 1 (interne, Router-ID manuel) et Process 100 (tunnel VPN, Area 10)
-![OSPF Process 1 et 100](./img/ospf-protocols-process1-100.png)
+![OSPF Process 1 et 100](ospf-protocols-process1-100.png)
 
 **État de l'interface Tunnel0** (`show int Tunnel0`) — GRE/IP up/up entre Router1 et Router2
-![Statut du tunnel GRE](./img/tunnel0-gre-status.png)
+![Statut du tunnel GRE](tunnel0-gre-status.png)
 
 **Configuration des interfaces** (`running-config`) — adressage, OSPF timers, ACLs, NAT appliqués
-![Configuration des interfaces](./img/running-config-interfaces.png)
+![Configuration des interfaces](running-config-interfaces.png)
 
 **Tests de connectivité** (`ping`) depuis PC1, PC7 et Laptop5 — validation de la connectivité et des ACLs
-![Tests de ping](./img/ping-tests-connectivity.png)
+![Tests de ping](ping-tests-connectivity.png)
 
 ---
 
@@ -95,13 +95,12 @@ Le réseau est composé de 3 sites (Router0, Router1, Router2/ISP) interconnect�
 
 ```
 ├── OSPF-NAT-PPP-VPN.pkt              # Fichier de topologie Packet Tracer
-├── img/
-│   ├── network-topology.png          # Topologie complète du réseau
-│   ├── ospf-adjacency-boot.png       # Adjacences OSPF au démarrage
-│   ├── ospf-protocols-process1-100.png  # show ip protocols (Process 1 & 100)
-│   ├── tunnel0-gre-status.png        # show int Tunnel0 (VPN GRE)
-│   ├── running-config-interfaces.png # Configuration des interfaces
-│   └── ping-tests-connectivity.png   # Tests de ping/connectivité
+├── network-topology.png              # Topologie complète du réseau
+├── ospf-adjacency-boot.png           # Adjacences OSPF au démarrage
+├── ospf-protocols-process1-100.png   # show ip protocols (Process 1 & 100)
+├── tunnel0-gre-status.png            # show int Tunnel0 (VPN GRE)
+├── running-config-interfaces.png     # Configuration des interfaces
+├── ping-tests-connectivity.png       # Tests de ping/connectivité
 └── README.md
 ```
 
