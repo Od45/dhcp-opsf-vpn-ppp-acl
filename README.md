@@ -1,6 +1,6 @@
 # 🌐 IP-GROUP — Configuration Réseau d'Entreprise (OSPF | NAT | PPP | VPN GRE | ACL)
 
-Projet réalisé sous **Cisco Packet Tracer** dans le cadre de la configuration et de la supervision de l'infrastructure réseau de l'entreprise **IP-GROUP**. Ce lab couvre le routage dynamique OSPF multi-zones, la translation d'adresses (NAT/PAT), l'authentification PPP/PAP sur les liaisons WAN, un tunnel VPN GRE, ainsi qu'une politique de sécurité basée sur des ACLs.
+Projet réalisé sous **Cisco Packet Tracer** dans le cadre de la configuration et de la supervision de l'infrastructure réseau de l'entreprise **IP-GROUP**. Ce lab couvre le routage dynamique OSPF multi-zones, la translation d'adresses (NAT/PAT), l'authentification PPP sur les liaisons WAN, un tunnel VPN GRE, ainsi qu'une politique de sécurité basée sur des ACLs.
 
 📁 Fichier Packet Tracer : [`OSPF-NAT-PPP-VPN.pkt`](./OSPF-NAT-PPP-VPN.pkt)
 
