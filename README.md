@@ -116,7 +116,7 @@ Le réseau est composé de 3 sites (Router0, Router1, Router2/ISP) interconnect�
 
 ## 👤 Auteur
 
-**Administrateur Réseau — IP-GROUP**
+**ALAYE Odilon Alabi Administrateur Système & Réseau**
 Lab réalisé dans le cadre d'un exercice pratique de configuration réseau d'entreprise (routage, sécurité, NAT, VPN).
 
 📌 N'hésitez pas à ⭐ ce dépôt si le projet vous a été utile !
