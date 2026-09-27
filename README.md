@@ -1,14 +1,37 @@
-# 🌐 IP-GROUP — Configuration Réseau d'Entreprise (OSPF | NAT | PPP | VPN GRE | ACL)
+# 🌐 IP-GROUP — Infrastructure Réseau d'Entreprise Sécurisée
 
-Projet réalisé sous **Cisco Packet Tracer** dans le cadre de la configuration et de la supervision de l'infrastructure réseau de l'entreprise **IP-GROUP**. Ce lab couvre le routage dynamique OSPF multi-zones, la translation d'adresses (NAT/PAT), l'authentification PPP/PAP sur les liaisons WAN, un tunnel VPN GRE, ainsi qu'une politique de sécurité basée sur des ACLs.
+![Cisco](https://img.shields.io/badge/Cisco-Packet%20Tracer-1BA0D7?logo=cisco&logoColor=white)
+![OSPF](https://img.shields.io/badge/Routing-OSPF%20Multi--Area-blue)
+![NAT](https://img.shields.io/badge/NAT%2FPAT-Overload-purple)
+![PPP](https://img.shields.io/badge/WAN-PPP%2FPAP-orange)
+![VPN](https://img.shields.io/badge/VPN-GRE%20Tunnel-red)
+![ACL](https://img.shields.io/badge/Security-ACL%20%C3%89tendues-yellow)
 
-📁 Fichier Packet Tracer : [`OSPF-NAT-PPP-VPN.pkt`](./OSPF-NAT-PPP-VPN.pkt)
+> Conception et sécurisation de l'infrastructure réseau complète de l'entreprise **IP-GROUP** : routage dynamique multi-zones, translation d'adresses, liaisons WAN authentifiées et tunnel VPN chiffré entre deux routeurs distants.
 
 ---
 
-## 🗺️ Topologie du réseau
+## 🎯 En bref
 
-Le réseau est composé de 3 sites (Router0, Router1, Router2/ISP) interconnectés, avec un routeur central Router3 desservant les départements internes.
+Ce projet met en œuvre une infrastructure réseau d'entreprise multi-sites de niveau avancé, combinant **routage dynamique OSPF à deux processus**, **NAT/PAT** pour l'accès Internet des départements internes, **authentification PPP/PAP** sur les liaisons WAN série, un **tunnel VPN GRE** reliant deux sites distants au travers d'un routeur ISP intermédiaire, et une politique de sécurité fine appliquée par ACL selon des règles métier différenciées par département.
+
+**Compétences mises en œuvre :**
+- Routage dynamique **OSPF multi-processus** (interne + tunnel VPN) avec Router-ID manuel et timers personnalisés
+- **NAT/PAT (overload)** pour la sortie Internet de plusieurs départements via des interfaces WAN distinctes
+- Sécurisation des liaisons WAN par **encapsulation PPP et authentification PAP**
+- Mise en place d'un **tunnel VPN GRE** entre deux sites distants, avec adjacence OSPF formée à travers le tunnel
+- Conception de **règles de sécurité métier** différenciées par utilisateur et par service, traduites en ACL étendues et standard
+- Diagnostic réseau via `show ip protocols`, `show interface tunnel`, `show ip nat translations` et tests de connectivité ciblés
+
+---
+
+## 🗺️ Architecture
+
+![Topologie réseau](network-topology.png)
+
+Le réseau est composé de **3 sites interconnectés** (Router0, Router1, Router2/ISP) avec un routeur central (Router3) desservant les départements internes. Router0 joue le rôle de **routeur ISP intermédiaire** entre Router1 et Router2.
+
+### Plan d'adressage — Départements
 
 | Département      | Sous-réseau         | Équipements               |
 |-------------------|----------------------|----------------------------|
@@ -18,105 +41,116 @@ Le réseau est composé de 3 sites (Router0, Router1, Router2/ISP) interconnect�
 | ACCOUNTING         | 192.168.2.8/29        | Laptop3 (INTERN), Laptop4 |
 | RESOURCES          | 192.168.0.32/27       | Server0, Laptop5 (CTO)    |
 
-**Liaisons WAN :**
-- Router1 ↔ Router0 : `209.100.200.0/27`
-- Router0 ↔ Router2 : `170.172.160.0/28`
-- Router1 ↔ Router3 : `9.0.0.0/28`
-- Tunnel GRE Router1 ↔ Router2 : `192.168.255.0/30`
+### Liaisons WAN
 
-> Router0 joue le rôle de routeur **ISP** intermédiaire entre Router1 et Router2.
+| Liaison | Réseau |
+|---|---|
+| Router1 ↔ Router0 | 209.100.200.0/27 |
+| Router0 ↔ Router2 | 170.172.160.0/28 |
+| Router1 ↔ Router3 | 9.0.0.0/28 |
+| Tunnel GRE Router1 ↔ Router2 | 192.168.255.0/30 |
 
 ---
 
 ## ⚙️ Réalisations techniques
 
-### 1️⃣ Configuration de base
-- Adressage IP complet de toutes les interfaces (LAN & WAN).
-- Configuration des switches et connectivité de bout en bout vérifiée par `ping`.
+### Routage dynamique OSPF multi-processus
 
-### 2️⃣ Routage dynamique OSPF
-- OSPF activé sur tous les routeurs, avec **Router-ID manuel** correspondant au numéro du routeur (ex : Router4 → `4.4.4.4`).
-- **Interfaces LAN passives** sur tous les routeurs (pas d'annonces OSPF inutiles vers les hôtes).
-- **Timers OSPF personnalisés** : `hello-interval 5` / `dead-interval 20` sur toutes les interfaces participant à OSPF.
-- Deux processus OSPF distincts : **Process 1** (routage interne) et **Process 100** (tunnel VPN, Area 10).
+OSPF est activé sur l'ensemble des routeurs avec un **Router-ID manuel** cohérent (ex : Router4 → `4.4.4.4`), des **interfaces LAN passives** pour éviter toute annonce inutile vers les hôtes, et des **timers personnalisés** (`hello-interval 5` / `dead-interval 20`) sur les liaisons participantes. Deux processus distincts cohabitent : le **Process 1** pour le routage interne, et le **Process 100** dédié au tunnel VPN (Area 10).
 
-### 3️⃣ Sécurité (ACLs)
-- 🚫 **Laptop3 "INTERN"** (Accounting) : accès bloqué au serveur et au reste du réseau.
-- 🖨️ **SALLE_PRINTER** : accessible uniquement depuis le **HR-DEPARTMENT**.
-- 🔐 **Laptop5 "CTO"** : seul autorisé à établir une connexion distante sécurisée (SSH) vers le routeur du département TECHNICAL (Router3) ; le reste du trafic reste autorisé.
-- 🚫 **PC0 (TECHNICAL)** : ping bloqué vers `192.168.2.0/29`, mais communication autorisée avec le reste du réseau.
-- 🚫 **PC1 (TECHNICAL)** : ping bloqué vers Laptop5 "CTO" uniquement, reste du réseau accessible.
+![Vérification des processus OSPF](ospf-protocols-process1-100.png)
 
-### 4️⃣ NAT / PAT
-- **Router0** : NAT translatant le trafic du **HR-DEPARTMENT** vers l'adresse de son interface WAN série (overload).
-- **Router2** : passerelle par défaut du **TECHNICAL**, avec **PAT** translatant leur trafic vers l'interface WAN de Router2.
+La formation des adjacences est confirmée dès le démarrage sur l'ensemble des liaisons série (`%OSPF-5-ADJCHG ... FULL`).
 
-### 5️⃣ Liaisons WAN — PPP & PAP
-- Encapsulation **PPP** avec authentification **PAP** configurée sur les 3 liaisons :
-  - Router2 ↔ Router0 (ISP)
-  - Router0 ↔ Router1 (ISP)
-  - Router1 ↔ Router3
+![Adjacences OSPF au démarrage](ospf-adjacency-boot.png)
 
-### 6️⃣ VPN — Tunnel GRE
-- Tunnel **GRE** établi entre Router1 (`209.100.200.2`) et Router2 (`170.172.160.3`) via le réseau `192.168.255.0/30`.
-- Adjacence **OSPF Process 100 (Area 10)** formée avec succès sur l'interface Tunnel0 (confirmé par `%OSPF-5-ADJCHG ... FULL`).
+### Tunnel VPN GRE entre sites distants
+
+Un tunnel **GRE** est établi entre Router1 (`209.100.200.2`) et Router2 (`170.172.160.3`) à travers le réseau `192.168.255.0/30`, avec une adjacence OSPF (Process 100, Area 10) formée avec succès directement sur l'interface `Tunnel0`.
+
+![État du tunnel GRE](tunnel0-gre-status.png)
+
+### Sécurisation des liaisons WAN (PPP/PAP)
+
+L'encapsulation **PPP** avec authentification **PAP** est configurée sur les trois liaisons série critiques du réseau (Router2 ↔ Router0, Router0 ↔ Router1, Router1 ↔ Router3), garantissant que seuls les équipements authentifiés peuvent établir la liaison WAN.
+
+### NAT / PAT — Accès Internet des départements
+
+**Router0** applique une translation NAT en *overload* pour le trafic du département HR vers son interface WAN série. **Router2**, passerelle par défaut du département TECHNICAL, applique une translation PAT équivalente vers sa propre interface WAN.
+
+### Politique de sécurité par ACL — règles métier différenciées
+
+| Règle | Portée |
+|---|---|
+| 🚫 Laptop3 "INTERN" (Accounting) | Accès bloqué au serveur et au reste du réseau |
+| 🖨️ SALLE_PRINTER | Accessible uniquement depuis le département HR |
+| 🔐 Laptop5 "CTO" | Seul autorisé à établir une connexion SSH vers Router3 (TECHNICAL) ; reste du trafic autorisé |
+| 🚫 PC0 (TECHNICAL) | Ping bloqué vers 192.168.2.0/29, reste du réseau accessible |
+| 🚫 PC1 (TECHNICAL) | Ping bloqué vers Laptop5 "CTO" uniquement, reste du réseau accessible |
+
+![Configuration des interfaces (running-config)](running-config-interfaces.png)
 
 ---
 
-## ✅ Tests & validations
+## ✅ Validation
 
-**Topologie complète du réseau**
-![Topologie réseau](network-topology.png)
+Les tests de connectivité (`ping`) réalisés depuis PC1, PC7 et Laptop5 confirment le comportement exact attendu par les règles métier : les flux autorisés passent normalement, les flux explicitement bloqués échouent comme prévu, validant l'ensemble de la politique de sécurité ACL en conditions réelles.
 
-**Formation des adjacences OSPF au démarrage** — `%OSPF-5-ADJCHG` FULL sur toutes les liaisons Serial
-![Adjacences OSPF](ospf-adjacency-boot.png)
+![Tests de connectivité et validation ACL](ping-tests-connectivity.png)
 
-**Vérification des processus OSPF** (`show ip protocols`) — Process 1 (interne, Router-ID manuel) et Process 100 (tunnel VPN, Area 10)
-![OSPF Process 1 et 100](ospf-protocols-process1-100.png)
+---
 
-**État de l'interface Tunnel0** (`show int Tunnel0`) — GRE/IP up/up entre Router1 et Router2
-![Statut du tunnel GRE](tunnel0-gre-status.png)
+## 📥 Tester le projet
 
-**Configuration des interfaces** (`running-config`) — adressage, OSPF timers, ACLs, NAT appliqués
-![Configuration des interfaces](running-config-interfaces.png)
+Le fichier de simulation Cisco Packet Tracer (`.pkt`) est disponible dans ce dépôt et prêt à être téléchargé directement :
 
-**Tests de connectivité** (`ping`) depuis PC1, PC7 et Laptop5 — validation de la connectivité et des ACLs
-![Tests de ping](ping-tests-connectivity.png)
+**➡️ [Télécharger OSPF-NAT-PPP-VPN.pkt](https://github.com/Od45/dhcp-opsf-vpn-ppp-acl/raw/refs/heads/main/OSPF-NAT-PPP-VPN-ACL.pkt)**
+
+> 📝 **Comment obtenir ce lien :**
+> 1. Une fois `OSPF-NAT-PPP-VPN.pkt` uploadé à la racine du dépôt, clique dessus dans la liste de fichiers GitHub.
+> 2. Repère le bouton **"Raw"** en haut à droite de la zone de prévisualisation.
+> 3. Clic droit → **"Copier l'adresse du lien"**.
+> 4. Colle ce lien à la place de `COLLE-ICI-LE-LIEN-RAW-GITHUB` ci-dessus.
+
+Ouvre-le avec **Cisco Packet Tracer (v8.x recommandé)** pour :
+- consulter la configuration complète de chaque routeur via l'onglet CLI,
+- lancer tes propres tests de connectivité (`ping`, `tracert`) depuis les différents postes,
+- vérifier en direct l'état du tunnel VPN GRE et des adjacences OSPF.
+
+---
+
+## 🚀 Pistes d'évolution
+
+- Ajouter l'authentification OSPF (MD5) sur les liaisons inter-routeurs pour sécuriser les échanges de routage.
+- Chiffrer le tunnel GRE avec IPsec pour une confidentialité réelle des données transitant entre sites (GRE seul n'assure que l'encapsulation, pas le chiffrement).
+- Documenter la table NAT (`show ip nat translations`) pour objectiver les traductions en cours.
+- Ajouter une liaison WAN de secours pour éliminer le point de panne unique entre Router1 et Router2.
 
 ---
 
 ## 🛠️ Technologies & protocoles utilisés
 
-`Cisco IOS` `OSPF (multi-area, multi-process)` `NAT/PAT` `PPP` `PAP` `GRE VPN Tunnel` `Extended & Standard ACLs` `Static Routing` `Cisco Packet Tracer`
+`Cisco IOS` · `OSPF (multi-area, multi-process)` · `NAT/PAT` · `PPP` · `PAP` · `GRE VPN Tunnel` · `Extended & Standard ACLs` · `Static Routing` · `Cisco Packet Tracer`
 
 ---
 
 ## 📂 Structure du dépôt
 
 ```
-├── OSPF-NAT-PPP-VPN.pkt              # Fichier de topologie Packet Tracer
-├── network-topology.png              # Topologie complète du réseau
-├── ospf-adjacency-boot.png           # Adjacences OSPF au démarrage
-├── ospf-protocols-process1-100.png   # show ip protocols (Process 1 & 100)
-├── tunnel0-gre-status.png            # show int Tunnel0 (VPN GRE)
-├── running-config-interfaces.png     # Configuration des interfaces
-├── ping-tests-connectivity.png       # Tests de ping/connectivité
-└── README.md
+├── README.md
+├── OSPF-NAT-PPP-VPN.pkt              ← fichier de simulation à ouvrir dans Packet Tracer
+├── network-topology.png
+├── ospf-adjacency-boot.png
+├── ospf-protocols-process1-100.png
+├── tunnel0-gre-status.png
+├── running-config-interfaces.png
+└── ping-tests-connectivity.png
 ```
-
----
-
-## ▶️ Comment tester ce lab
-
-1. Ouvrir le fichier `OSPF-NAT-PPP-VPN.pkt` avec **Cisco Packet Tracer** (v8.x recommandé).
-2. Consulter la configuration de chaque routeur via l'onglet **CLI**.
-3. Lancer des tests de connectivité (`ping`, `tracert`) depuis les différents PC/Laptops pour valider les règles de sécurité.
 
 ---
 
 ## 👤 Auteur
 
-**ALAYE Odilon Alabi Administrateur Système & Réseau**
-Lab réalisé dans le cadre d'un exercice pratique de configuration réseau d'entreprise (routage, sécurité, NAT, VPN).
+**ALAYE Odilon Alabi** — Administrateur Système & Réseau
 
-📌 N'hésitez pas à ⭐ ce dépôt si le projet vous a été utile !
+N'hésite pas à me contacter pour toute question sur ce projet ou pour échanger sur des opportunités en administration réseau / infrastructure.
