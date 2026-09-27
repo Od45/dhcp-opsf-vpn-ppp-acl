@@ -106,17 +106,6 @@ Le fichier de simulation Cisco Packet Tracer (`.pkt`) est disponible dans ce dé
 
 **➡️ [Télécharger OSPF-NAT-PPP-VPN.pkt](https://github.com/Od45/dhcp-opsf-vpn-ppp-acl/raw/refs/heads/main/OSPF-NAT-PPP-VPN-ACL.pkt)**
 
-> 📝 **Comment obtenir ce lien :**
-> 1. Une fois `OSPF-NAT-PPP-VPN.pkt` uploadé à la racine du dépôt, clique dessus dans la liste de fichiers GitHub.
-> 2. Repère le bouton **"Raw"** en haut à droite de la zone de prévisualisation.
-> 3. Clic droit → **"Copier l'adresse du lien"**.
-> 4. Colle ce lien à la place de `COLLE-ICI-LE-LIEN-RAW-GITHUB` ci-dessus.
-
-Ouvre-le avec **Cisco Packet Tracer (v8.x recommandé)** pour :
-- consulter la configuration complète de chaque routeur via l'onglet CLI,
-- lancer tes propres tests de connectivité (`ping`, `tracert`) depuis les différents postes,
-- vérifier en direct l'état du tunnel VPN GRE et des adjacences OSPF.
-
 ---
 
 ## 🚀 Pistes d'évolution
